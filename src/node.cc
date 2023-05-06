@@ -263,6 +263,7 @@ static
 MaybeLocal<Value> StartExecution(Environment* env, const char* main_script_id) {
   EscapableHandleScope scope(env->isolate());
   CHECK_NOT_NULL(main_script_id);
+  // @TODO 这个是哪来的
   Realm* realm = env->principal_realm();
 
   return scope.EscapeMaybe(realm->ExecuteBootstrapper(main_script_id));
@@ -1200,6 +1201,7 @@ ExitCode LoadSnapshotDataAndRun(const SnapshotData** snapshot_data_ptr,
     }
   }
 
+  // 使用带快照的构造函数
   NodeMainInstance main_instance(*snapshot_data_ptr,
                                  uv_default_loop(),
                                  per_process::v8_platform.Platform(),
@@ -1259,6 +1261,7 @@ static ExitCode StartInternal(int argc, char** argv) {
   return LoadSnapshotDataAndRun(&snapshot_data, result.get());
 }
 
+// 初试启动执行
 int Start(int argc, char** argv) {
 #ifndef DISABLE_SINGLE_EXECUTABLE_APPLICATION
   std::tie(argc, argv) = sea::FixupArgsForSEA(argc, argv);

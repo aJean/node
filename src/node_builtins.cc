@@ -182,9 +182,12 @@ static std::string OnDiskFileName(const char* id) {
 }
 #endif  // NODE_BUILTIN_MODULES_PATH
 
+// 加载 builtin 模块源码
 MaybeLocal<String> BuiltinLoader::LoadBuiltinSource(Isolate* isolate,
                                                     const char* id) const {
+
   auto source = source_.read();
+// 如果没定义 builtin modules path，从 source 中直接取
 #ifndef NODE_BUILTIN_MODULES_PATH
   const auto source_it = source->find(id);
   if (UNLIKELY(source_it == source->end())) {
@@ -192,7 +195,8 @@ MaybeLocal<String> BuiltinLoader::LoadBuiltinSource(Isolate* isolate,
     ABORT();
   }
   return source_it->second.ToStringChecked(isolate);
-#else   // !NODE_BUILTIN_MODULES_PATH
+#else
+  // 文件名拼接，例如 ${NODE_BUILTIN_MODULES_PATH}/lib/internal/main/mksnapshot.js
   std::string filename = OnDiskFileName(id);
 
   std::string contents;
@@ -270,6 +274,7 @@ MaybeLocal<Function> BuiltinLoader::LookupAndCompileInternal(
       OneByteString(isolate, filename_s.c_str(), filename_s.size());
   ScriptOrigin origin(isolate, filename, 0, 0, true);
 
+  // 代码缓存，可以节省 source -> ast -> parse -> bytecode 这一过程
   ScriptCompiler::CachedData* cached_data = nullptr;
   {
     // Note: The lock here should not extend into the
@@ -286,24 +291,16 @@ MaybeLocal<Function> BuiltinLoader::LookupAndCompileInternal(
   }
 
   const bool has_cache = cached_data != nullptr;
-  ScriptCompiler::CompileOptions options =
-      has_cache ? ScriptCompiler::kConsumeCodeCache
-                : ScriptCompiler::kEagerCompile;
+  ScriptCompiler::CompileOptions options = has_cache ? ScriptCompiler::kConsumeCodeCache : ScriptCompiler::kEagerCompile;
   ScriptCompiler::Source script_source(source, origin, cached_data);
 
   per_process::Debug(DebugCategory::CODE_CACHE,
                      "Compiling %s %s code cache\n",
                      id,
                      has_cache ? "with" : "without");
-
+  // 编译 function
   MaybeLocal<Function> maybe_fun =
-      ScriptCompiler::CompileFunction(context,
-                                      &script_source,
-                                      parameters->size(),
-                                      parameters->data(),
-                                      0,
-                                      nullptr,
-                                      options);
+      ScriptCompiler::CompileFunction(context, &script_source, parameters->size(), parameters->data(), 0, nullptr, options);
 
   // This could fail when there are early errors in the built-in modules,
   // e.g. the syntax errors
@@ -431,12 +428,13 @@ MaybeLocal<Value> BuiltinLoader::CompileAndCall(Local<Context> context,
                  get_linked_binding,
                  get_internal_binding,
                  realm->primordials()};
+  // 因为 id = internal/main/mksnapshot，所以可以命中
   } else if (strncmp(id, "internal/main/", strlen("internal/main/")) == 0 ||
              strncmp(id,
                      "internal/bootstrap/",
                      strlen("internal/bootstrap/")) == 0) {
-    // internal/main/*, internal/bootstrap/*: process, require,
-    //                                        internalBinding, primordials
+    // internal/main/*, internal/bootstrap/*
+    // 填充参数 process, require, internalBinding, primordials
     arguments = {realm->process_object(),
                  realm->builtin_module_require(),
                  realm->internal_binding_loader(),

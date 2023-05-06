@@ -153,6 +153,7 @@ void Realm::DeserializeProperties(const RealmSerializeInfo* info) {
   DoneBootstrapping();
 }
 
+// id 可能是 internal/main/mksnapshot
 MaybeLocal<Value> Realm::ExecuteBootstrapper(const char* id) {
   EscapableHandleScope scope(isolate());
   Local<Context> ctx = context();

@@ -87,6 +87,7 @@ MaybeLocal<Object> CreateProcessObject(Realm* realm) {
   process_template->SetClassName(realm->env()->process_string());
   Local<Function> process_ctor;
   Local<Object> process;
+  // 创建空 function 和 空 object
   if (!process_template->GetFunction(context).ToLocal(&process_ctor) ||
       !process_ctor->NewInstance(context).ToLocal(&process)) {
     return MaybeLocal<Object>();
@@ -171,6 +172,7 @@ MaybeLocal<Object> CreateProcessObject(Realm* realm) {
   // available from the beginning for debugging purposes
   SetMethod(context, process, "_rawDebug", RawDebug);
 
+  // 返回到外部必须 Escape
   return scope.Escape(process);
 }
 

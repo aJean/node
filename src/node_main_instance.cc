@@ -85,6 +85,7 @@ ExitCode NodeMainInstance::Run() {
   return exit_code;
 }
 
+// 执行
 void NodeMainInstance::Run(ExitCode* exit_code, Environment* env) {
   if (*exit_code == ExitCode::kNoFailure) {
     bool is_sea = false;
@@ -95,6 +96,7 @@ void NodeMainInstance::Run(ExitCode* exit_code, Environment* env) {
     }
 #endif
     if (!is_sea) {
+      // 执行 StartExecution node.cc
       LoadEnvironment(env, StartExecutionCallback{});
     }
 
