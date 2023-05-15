@@ -687,7 +687,7 @@ node_module napi_module_to_node_module(const napi_module* mod) {
 }
 }  // namespace node
 
-// Registers a NAPI module.
+// napi 注册模块方式
 void NAPI_CDECL napi_module_register(napi_module* mod) {
   node::node_module* nm =
       new node::node_module(node::napi_module_to_node_module(mod));
