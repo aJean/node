@@ -95,6 +95,7 @@
 // binding::RegisterBuiltinBindings(). This is only forward declaration.
 // The definitions are in each binding's implementation when calling
 // the NODE_BINDING_CONTEXT_AWARE_INTERNAL.
+// 这个 undef 语法表示在 NODE_BUILTIN_BINDINGS 中才能使用这个宏，其它地方都不可用
 #define V(modname) void _register_##modname();
 NODE_BUILTIN_BINDINGS(V)
 #undef V
